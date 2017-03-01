@@ -107,6 +107,12 @@ inline void A_ShowCursor(int yes)
 		UART1_SendStr("\033[?25l");
 }
 
+volatile bool want_led_disp = 0;
+
+void sched_LED_DISP(void) {
+	want_led_disp = 1;
+}
+
 void LED_DISPL(void) {
 	A_GoTo(10,0);
 	A_FgBg(WHITE,BLACK);
@@ -118,6 +124,7 @@ void LED_DISPL(void) {
 		A_Fg(GREEN2);
 	}
 	A_Str("[LED]");
+	want_led_disp = 0;
 }
 
 int timecounter = 0;
@@ -135,6 +142,30 @@ void TIME_DISP(void) {
 	sprintf(buf, "t = %d", timecounter);
 	A_Str(buf);
 	A_Fg(BLACK);
+}
+
+void SCREEN_INIT(void) {
+	u8 j;
+
+	A_Reset();
+	A_ShowCursor(0);
+
+	A_FgBg(WHITE2, BLUE);
+	A_ClearScreen(CLEAR_ALL);
+
+	A_GoTo(2, 8);
+	A_Fg(CYAN2);
+	A_Str("STM8");
+	A_Fg(WHITE2);
+	A_Str(" Hello!");
+
+	A_Bg(BLACK);
+	for(j=7;j<10;j++) {
+		A_GoTo(j, 0);
+		A_ClearLine(CLEAR_ALL);
+	}
+
+	LED_DISPL();
 }
 
 void main(void)
@@ -170,25 +201,7 @@ void main(void)
 	}
 	GPIOB->ODR |=GPIO_PIN_4;
 
-	A_Reset();
-	A_ShowCursor(0);
-
-	A_FgBg(WHITE2, BLUE);
-	A_ClearScreen(CLEAR_ALL);
-
-	A_GoTo(2, 8);
-	A_Fg(CYAN2);
-	A_Str("STM8");
-	A_Fg(WHITE2);
-	A_Str(" Hello!");
-
-	A_Bg(BLACK);
-	for(j=7;j<10;j++) {
-		A_GoTo(j, 0);
-		A_ClearLine(CLEAR_ALL);
-	}
-
-	LED_DISPL();
+	SCREEN_INIT();
 
 	Delay(10);
 
@@ -197,6 +210,8 @@ void main(void)
 		GPIOB->ODR ^= GPIO_PIN_5;
 
 		TIME_DISP();
+
+		// BUG: race cond if reset while rendering
 
 		// Animated line
 		j=(timecounter%52)-26;
@@ -210,6 +225,8 @@ void main(void)
 		for(l=0;l<=k-j;l++) {
 			A_Char(' ');
 		}
+
+		if (want_led_disp) LED_DISPL();
 
 		timecounter++;
 		Delay(2000);
@@ -234,11 +251,18 @@ void handleRxChar(char c) {
 	static int i1, i2;
 	static int state;
 
+	if (esp_is_ready && c == 0x18) {
+		SCREEN_INIT();
+		state = 0;
+		i1 = 0; i2 = 0;
+		return;
+	}
+
 	if (state==0) {
 		if (c == 1) {
 			// hard button
 			GPIOB->ODR ^= GPIO_PIN_4;
-			LED_DISPL();
+			sched_LED_DISP();
 		}
 		else if (c == '\033') {
 			state = 1;
@@ -280,7 +304,7 @@ void handleRxChar(char c) {
 
 			if (MOUSE_IN(i1, i2, 10, 10, 1, 5)) {
 				GPIOB->ODR ^= GPIO_PIN_4;
-				LED_DISPL();
+				sched_LED_DISP();
 			}
 
 			if (MOUSE_IN(i1, i2, 4, 4, 8, 20)) {
@@ -304,7 +328,9 @@ void Delay(uint16_t nCount)
 {
 	uint8_t i;
 	for (; nCount != 0; nCount--) {
-		for (i = 255; i != 0; i--) {}
+		for (i = 255; i != 0; i--) {
+			if (want_led_disp) LED_DISPL();
+		}
 	}
 }
 

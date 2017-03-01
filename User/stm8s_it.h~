@@ -1,0 +1,31 @@
+/**
+ * STM8S interrupt handlers
+ */
+
+#ifndef __STM8S_IT_H
+#define __STM8S_IT_H
+
+#include "stm8s.h"
+
+void TRAP_IRQHandler(void) INTERRUPT; /* TRAP */
+void TLI_IRQHandler(void) INTERRUPT; /* TLI */
+void AWU_IRQHandler(void) INTERRUPT; /* AWU */
+void CLK_IRQHandler(void) INTERRUPT; /* CLOCK */
+void EXTI_PORTA_IRQHandler(void) INTERRUPT; /* EXTI PORTA */
+void EXTI_PORTB_IRQHandler(void) INTERRUPT; /* EXTI PORTB */
+void EXTI_PORTC_IRQHandler(void) INTERRUPT; /* EXTI PORTC */
+void EXTI_PORTD_IRQHandler(void) INTERRUPT; /* EXTI PORTD */
+void EXTI_PORTE_IRQHandler(void) INTERRUPT; /* EXTI PORTE */
+void SPI_IRQHandler(void) INTERRUPT; /* SPI */
+void TIM1_CAP_COM_IRQHandler(void) INTERRUPT; /* TIM1 CAP/COM */
+void TIM1_UPD_OVF_TRG_BRK_IRQHandler(void) INTERRUPT; /* TIM1 UPD/OVF/TRG/BRK */
+void TIM2_UPD_OVF_BRK_IRQHandler(void) INTERRUPT; /* TIM2 UPD/OVF/BRK */
+void TIM2_CAP_COM_IRQHandler(void) INTERRUPT; /* TIM2 CAP/COM */
+void UART1_TX_IRQHandler(void) INTERRUPT; /* UART1 TX */
+void UART1_RX_IRQHandler(void) INTERRUPT 18; /* UART1 RX */
+void I2C_IRQHandler(void) INTERRUPT; /* I2C */
+void ADC1_IRQHandler(void) INTERRUPT; /* ADC1 */
+void TIM4_UPD_OVF_IRQHandler(void) INTERRUPT; /* TIM4 UPD/OVF */
+void EEPROM_EEC_IRQHandler(void) INTERRUPT; /* EEPROM ECC CORRECTION */
+
+#endif

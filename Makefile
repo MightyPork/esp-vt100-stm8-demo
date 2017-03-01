@@ -42,17 +42,18 @@ PRJ_OBJECTS := $(addprefix $(OUTPUT_DIR)/, $(PRJ_SOURCE:.c=.rel))
 #SPL_SRC_DIR = /usr/share/sdcc/lib/src/stm8/
 #SPL_INC_DIR = /usr/share/sdcc/include/stm8/
 
-SPL_SRC_DIR = Libraries/SPL/src/
-SPL_INC_DIR = Libraries/SPL/inc/
+#SPL_SRC_DIR = Libraries/SPL/src/
+SPL_INC_DIR = Library/SPL/
 # add all library sources used here
-SPL_SOURCE  = stm8s_gpio.c stm8s_uart1.c stm8s_clk.c
-SPL_OBJECTS := $(addprefix $(OUTPUT_DIR)/, $(SPL_SOURCE:.c=.rel))
+#SPL_SOURCE  = stm8s_gpio.c stm8s_uart1.c stm8s_clk.c
+#SPL_OBJECTS := $(addprefix $(OUTPUT_DIR)/, $(SPL_SOURCE:.c=.rel))
 
 # collect all include folders
 INCLUDE = -I$(PRJ_SRC_DIR) -I$(SPL_INC_DIR)
 
 # collect all source directories
-VPATH=$(PRJ_SRC_DIR):$(SPL_SRC_DIR)
+VPATH=$(PRJ_SRC_DIR)
+#:$(SPL_SRC_DIR)
 
 .PHONY: clean
 
@@ -64,7 +65,8 @@ $(OUTPUT_DIR)/%.rel: %.c
 $(OUTPUT_DIR)/%.rel: %.c
 	$(CC) $(CFLAGS) -D$(DEVICE) $(INCLUDE) -c $? -o $@
 
-$(TARGET): $(PRJ_OBJECTS) $(SPL_OBJECTS)
+#
+$(TARGET): $(PRJ_OBJECTS)
 	$(CC) $(CFLAGS) -o $(TARGET) $^
 
 flash: $(TARGET)
